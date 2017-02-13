@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 	"github.com/russross/blackfriday"
 )
 
@@ -19,10 +20,10 @@ var (
 	db     *sql.DB
 )
 
-func repeatHandler(c *gin.Context) {
+func repeatFunc(c *gin.Context) {
 	var buffer bytes.Buffer
 	for i := 0; i < repeat; i++ {
-		buffer.WriteString("Hello from Go!\n")
+		buffer.WriteString("Hello from Go!")
 	}
 	c.String(http.StatusOK, buffer.String())
 }
@@ -60,17 +61,17 @@ func dbFunc(c *gin.Context) {
 }
 
 func main() {
-	var err error
 	port := os.Getenv("PORT")
 
 	if port == "" {
 		log.Fatal("$PORT must be set")
 	}
 
+	var err error
 	tStr := os.Getenv("REPEAT")
 	repeat, err = strconv.Atoi(tStr)
 	if err != nil {
-		log.Printf("Error converting $REPEAT to an int: %q - Using default\n", err)
+		log.Print("Error converting $REPEAT to an int: %q - Using default", err)
 		repeat = 5
 	}
 
@@ -92,7 +93,7 @@ func main() {
 		c.String(http.StatusOK, string(blackfriday.MarkdownBasic([]byte("**hi!**"))))
 	})
 
-	router.GET("/repeat", repeatHandler)
+	router.GET("/repeat", repeatFunc)
 	router.GET("/db", dbFunc)
 
 	router.Run(":" + port)
